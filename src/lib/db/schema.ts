@@ -1,6 +1,8 @@
 
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
 
+
+// my movies schema
 const movies = sqliteTable('movies', {
     id: integer('id').primaryKey(),
     title: text('title').notNull(),
@@ -13,12 +15,17 @@ const movies = sqliteTable('movies', {
     runtime: integer('runtime'),
 })
 
+
+
+// my movie watchlist
 export const watchlist = sqliteTable('watchlist', {
     id: integer('id').primaryKey({ autoIncrement: true}),
     movieId: integer('movie_id').notNull(),
     addedAt: text('added_at').notNull(),
 })
 
+
+// my watched moives
 export const watched = sqliteTable('watched',{
     id: integer('id').primaryKey({ autoIncrement: true }),
     movieId: integer('movie_id').notNull(),
