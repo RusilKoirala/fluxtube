@@ -30,5 +30,5 @@ export const watched = sqliteTable('watched',{
     id: integer('id').primaryKey({ autoIncrement: true }),
     movieId: integer('movie_id').notNull(),
     watchedAt: text('watched_at').notNull(),
-    rating: integer('rating')
+    rating: integer('rating'),
 })

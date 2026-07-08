@@ -13,6 +13,8 @@
 # testing
 /coverage
 
+/movies.db
+
 # next.js
 /.next/
 /out/
