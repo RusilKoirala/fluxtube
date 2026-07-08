@@ -1,0 +1,27 @@
+// just the types of user for freaking typescript
+
+export interface User {
+    id: number,
+    username: string,
+    email: string,
+    avatarUrl?: string;
+    bio?: string,
+    createdAt: string,
+}
+
+export interface UserProfile extends User {
+    watchlistCount: number,
+    watchedCount: number,
+    reviewCount: number,
+}
+
+
+export interface Review {
+    id: number,
+    userId: number,
+    movieId: number,
+    content: string,
+    rating: number,
+    createdAt: string,
+    user?: User,
+}   
