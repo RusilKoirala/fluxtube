@@ -1,11 +1,38 @@
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { Header } from "@/components/Header";
+import { MovieCard } from "@/components/MovieCard";
+
+export default function HomePage() {
+  const { data: popular, isLoading: popularLoading} = usePopularMovies()
+  const { data: trending, isLoading: trendingLoading } = useTrendingMovies();
+
   return (
-   <div className="flex">
-      <Image src="/logo.jpg" width={50} height={50} alt=""></Image>
-      <p className="text-xl font-semibold tracking-tight items-center mt-2"><span className="text-red-500">Flex</span>Tube</p>
-   </div>
-  );
+    <div className="min-h-screen bg-black">
+      <Header/>
+
+      <main className="container mx-auto px-4 py-8 space-y-12">
+
+        <section>
+          { trendigLoading ? (
+            <div className="text-center py-12">
+              <p className="text-gray-400">Loading trending movies...</p>
+            </div>
+          ): (
+            <MovieCard movie={trending || []} title="Trending"/>
+          )}
+        </section>
+
+        <section>
+          { popularLoading ? (
+            <div className="text-center py-12">
+              <p className="text-gray-400">Loading popular movies...</p>
+            </div>
+          ): (
+            <MovieCard movie={popular || []} title="Popular Movies"/>
+          )}
+        </section>
+      </main>
+    </div>
+)
 }
