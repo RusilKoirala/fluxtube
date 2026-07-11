@@ -3,7 +3,7 @@
 import { Search } from "lucide-react";
 import { useState } from "react";
 import { useMovieStore } from "@/store/useMovieStore";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 
 export function SearchBar() {

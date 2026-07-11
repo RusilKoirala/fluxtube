@@ -48,12 +48,14 @@ export function MovieCard({ movie }: { movie: Movie }) {
 
         <div className="relative aspect-[2/3]">
           <Image
-            src={getImageUrl(movie.poster_path)}
-            alt={movie.title}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-          />
+  src={getImageUrl(movie.poster_path)}
+  alt={movie.title || 'Movie poster'}
+  fill
+  className="object-cover"
+  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+  unoptimized
+/>
+
 
 
           <div className="absolute inset-0 bg-black/60 opacity-0 transition-opacity group-hover:opacity-100 flex flex-col justify-end p-4">

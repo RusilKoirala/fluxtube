@@ -8,6 +8,9 @@ import { getImageUrl } from "@/lib/api/tmdb";
 import { Calendar, Clock, Star, Plus, Check, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieGrid } from "@/components/MovieGrid";
+import { useMovieDetails, useRecommendations } from '@/hooks/useMovies';
+import Image from 'next/image';
+
 
 
 
