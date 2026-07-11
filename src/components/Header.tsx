@@ -1,54 +1,75 @@
 'use client';
 
-import Link from "next/link";
-import { SearchBar } from "./SearchBar";
-import { Film, User, List, Clock} from 'lucide-react'
-import { useMovieStore } from "@/store/useMovieStore";
-import { Button } from './ui/button'
-
+import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Search, Bell, Settings, Film } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export function Header() {
-    const currentUserId = useMovieStore((state)=> state.currentUserId);
+  const pathname = usePathname();
 
-    return (
-        <header className="sticky top-0 z-50 bg-black/95 backdrop:blur border-b border-gray-800">
-            <div className="container mx-auto px-4 py-4">
-                <div className="flex items-center justfiy-between gap-4">
-                    <Link href="/" className="flex items-center gap-2">
-                    <Film className="w-8 h-8 text-red-500"/>
-                    <span className="text-xl font-bold text-white">FluxTube</span>
-                    </Link>
 
-                    <div className="flex-1 max-w-2xl">
-                        <SearchBar/>    
-                    </div> 
 
-                    <nav className="flex items-center gap-4">
-                        <Link href="">
-                        <Button variant="ghost" size="sm">
-                            <List className="w-5 h-5"/>
-                            <span className="ml-2 hidden sm:inline">Watchlist</span>
-                        </Button>
-                        </Link>
 
-                        <Link href="/watched">
-                            <Button variant="ghost" size="sm">
-                                <Clock className="w-5 h-5"/>
-                                <span className="ml-2 hidden sm:inline">Watched</span>
-                            </Button>
-                        </Link>
+  const navItems = [
+    { href: '/', label: 'Home' },
+    { href: '/watchlist', label: 'Watchlist' },
+    { href: '/watched', label: 'Watched' },
+  ];
 
-                        <Link href={currentUserId ? `/profile/${currentUserId}` : '/login'}>
-                            <Button variant="ghost"
-                            size="sm"
-                            >
-                                <User className="w-5 h-5"/>
-                                <span className="ml-2 hidden sm:inline">Profile</span>
-                            </Button>
-                        </Link>
-                    </nav> 
-                </div>
-            </div>
-        </header>
-    )
+  const isActivePath = (href: string) => {
+    const cleanHref = href.split('?')[0];
+    return pathname === cleanHref;
+  };
+
+  return (
+    <header
+      className="
+        fixed inset-x-0 top-0 z-50"
+    >
+      <div className="relative flex h-20 items-center justify-between px-6 md:px-12 lg:px-14">
+        <div className="flex items-center">
+          <Link href="/" className="flex items-center gap-3">
+           <Film className='w-5 h-5'/>  
+            <span className="hidden text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-white/82 sm:inline">
+              FluxTube
+            </span>
+          </Link>
+        </div>
+
+        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 text-[0.88rem] uppercase tracking-[0.12em] text-white/86 lg:flex">
+          {navItems.map((item) => {
+            const isActive = isActivePath(item.href);
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  'relative pb-1.5 transition-colors hover:text-white',
+                  "after:absolute after:bottom-0 after:left-1/2 after:h-0.5 after:w-0 after:-translate-x-1/2 after:rounded-full after:bg-[#E50914] after:transition-[width] after:duration-300",
+                  isActive ? 'text-white after:w-5' : 'after:w-0 hover:after:w-4'
+                )}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="flex items-center gap-3 text-white">
+          <Link
+            href="/search"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/35 hover:bg-black/60"
+            aria-label="Search"
+          >
+            <Search className="h-4 w-4" />
+          </Link>
+        
+   
+        </div>
+      </div>
+    </header>
+  );
 }
