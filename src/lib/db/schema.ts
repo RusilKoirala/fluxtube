@@ -61,3 +61,22 @@ export const reviews = sqliteTable('reviews', {
     rating: integer('rating').notNull(),
     createdAt: text('created_at').notNull(),
 })
+
+
+// likes <3
+export const likes = sqliteTable('follows', {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    followerId: integer('follower_id').notNull(),
+    followingId: integer('following_id').notNull(),
+    createdAt: text('created_at').notNull()
+})
+
+// follows (MY FANSS)
+export const follows = sqliteTable('follows', {
+    id: integer('id').primaryKey({
+        autoIncrement: true
+    }),
+    followerId: integer('follower_id').notNull(),
+    followingId: integer('following_id').notNull(),
+    createdAt: text('created_at').notNull()
+})

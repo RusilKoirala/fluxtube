@@ -15,6 +15,13 @@
       "when": 1783521497545,
       "tag": "0001_silly_mother_askani",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1783785657822,
+      "tag": "0002_glamorous_thor_girl",
+      "breakpoints": true
     }
   ]
 }
