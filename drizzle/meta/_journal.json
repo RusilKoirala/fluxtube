@@ -22,6 +22,13 @@
       "when": 1783785657822,
       "tag": "0002_glamorous_thor_girl",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1783838451187,
+      "tag": "0003_public_pete_wisdom",
+      "breakpoints": true
     }
   ]
 }

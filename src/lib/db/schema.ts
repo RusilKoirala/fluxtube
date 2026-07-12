@@ -66,8 +66,8 @@ export const reviews = sqliteTable('reviews', {
 // likes <3
 export const likes = sqliteTable('follows', {
     id: integer('id').primaryKey({ autoIncrement: true }),
-    followerId: integer('follower_id').notNull(),
-    followingId: integer('following_id').notNull(),
+    userId : integer('user_id').notNull(),
+    reviewId: integer('review_id').notNull(),
     createdAt: text('created_at').notNull()
 })
 

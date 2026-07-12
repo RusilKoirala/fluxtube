@@ -13,7 +13,10 @@ export interface UserProfile extends User {
     watchlistCount: number,
     watchedCount: number,
     reviewCount: number,
+    followersCount: number,
+    followingCount: number,
 }
+
 
 
 export interface Review {
@@ -23,5 +26,15 @@ export interface Review {
     content: string,
     rating: number,
     createdAt: string,
-    user?: User,
+    updatedAt?: string,
+    username?: string,
+    avatarUrl?: string,
 }   
+
+export interface Follow {
+    id: number,
+    username: string,
+    avatarUrl?: string,
+    bio?: string,
+    followedAt: string,
+}
