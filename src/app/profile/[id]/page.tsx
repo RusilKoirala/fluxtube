@@ -12,6 +12,8 @@ import { useQuery } from "@tanstack/react-query";
 import { tmdbClient } from "@/lib/api/tmdb";
 import { Movie } from "@/types/movie";
 import Image from "next/image";
+import { FollowButton } from "@/components/FollowButton";
+import { Clock, Film, ListIcon, Users } from "lucide-react";
 
 export default function ProfilePage({
   params,
@@ -36,7 +38,7 @@ export default function ProfilePage({
   >("reviews");
 
 
-  
+
 
   const isOwnProfile = currentuserId === userId;
 
@@ -116,6 +118,73 @@ export default function ProfilePage({
                 </span>
               </div>
             )}
+          </div>
+
+
+
+          <div className="flex-1">
+            <div className="flex items-start justify-between mb-4">
+                <div>
+                    <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
+                        {user.username}
+                    </h1>
+                    <p className="text-white/60">{user.email}</p>
+                </div>
+
+                {!isOwnProfile && currentuserId && (
+                    <FollowButton 
+                    followerId={currentuserId}
+                    followingId={userId}
+                    />
+                )}
+            </div>
+
+            {user.bio && (
+                <p className="text-white/70 text-lg mb-6 max-w-2xl">
+                    {user.bio}
+                </p>
+            )}
+
+
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+                <div className="text-center md:text-left">
+                    <div className="flex items-center gap-2 text-white/90 mb-1">
+                    <Film className="w-5 h-5 text-[#E50914]"/>
+                    <span className="text-2xl font-bold">{user.reviewCount}</span>
+                    <p className="text-white/50 text-sm uppercase tracking-wider">Reviews</p>
+                    </div>
+
+                    <div className="text-center md:text-left">
+                        <div className="flex items-center gap-2 text-white/90 mb-1">
+                        <ListIcon className="w-5 h-5 text-blue-500"/>
+                        <span className="text-2xl font-bold">{user.watchlistCount}</span>
+                        </div>
+                        <p className="text-white/50 text-sm uppercase tracking-wider">Watchlist</p>
+                    </div>
+
+
+                    <div className="text-center md:text-left">
+                        <div className="flex items-center gap-2 text-white/90 mb-1">
+                        <Clock className="w-5 h-5 text-green-500"/>
+                        <span className="text-2xl font-bold">{user.watchedCount}</span>
+                        </div>
+                        <p className="text-white/50 text-sm uppercase tracking-wider">Watched</p>
+                    </div>
+
+                    <button 
+                        onClick={()=> setActiveTab('followers')}
+                        className="text-center md:text-left hover:opacity-80 transition-opacity"
+                    >
+                        <div className="flex items-center gap-2 text-white/90 mb-1">
+                            <Users className="w-5 h-5 text-purple-500"/>
+                            <span className="text-2xl font-bold">{user.followersCount}</span>
+                        </div>
+                        <p className="text-white/50 text-sm uppercase tracking-wider">Followers</p>
+                    </button>
+
+                    
+                </div>
+            </div>
           </div>
         </div>
       </div>
