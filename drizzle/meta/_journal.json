@@ -29,6 +29,13 @@
       "when": 1783838451187,
       "tag": "0003_public_pete_wisdom",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1784033420209,
+      "tag": "0004_slow_warlock",
+      "breakpoints": true
     }
   ]
 }
