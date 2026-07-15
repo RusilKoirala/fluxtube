@@ -2,13 +2,10 @@
 
 import { Review } from '@/types/user';
 
+
 import { Star, Heart, Trash2, Edit2 } from 'lucide-react';
 import { format } from 'date-fns';
-
-
-
 import { useLikesCount, useLikeReview, useUnlikeReview } from '@/hooks/useLikes';
-
 
 
 import { useMovieStore } from '@/store/useMovieStore';
@@ -45,6 +42,7 @@ export function ReviewCard({ review, onEdit, onDelete, showMovieLink }: ReviewCa
 
   return (
     <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6">
+     
 
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
@@ -57,6 +55,7 @@ export function ReviewCard({ review, onEdit, onDelete, showMovieLink }: ReviewCa
               className="rounded-full"
             />
           ) : (
+
             <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
               <span className="text-white/70 font-medium">
                 {review.username?.[0]?.toUpperCase() || 'U'}
@@ -71,7 +70,7 @@ export function ReviewCard({ review, onEdit, onDelete, showMovieLink }: ReviewCa
           </div>
         </div>
 
-  
+
         {isOwner && (
           <div className="flex gap-2">
             {onEdit && (
@@ -95,7 +94,7 @@ export function ReviewCard({ review, onEdit, onDelete, showMovieLink }: ReviewCa
       </div>
 
 
-      
+
 
       <div className="flex items-center gap-2 mb-3">
         {[...Array(10)].map((_, i) => (
@@ -112,11 +111,11 @@ export function ReviewCard({ review, onEdit, onDelete, showMovieLink }: ReviewCa
       </div>
 
    
+
       <p className="text-white/80 leading-relaxed mb-4">{review.content}</p>
 
-
-
-  
+    
+    
       <div className="flex items-center gap-4 pt-4 border-t border-white/5">
         <button
           onClick={handleLike}

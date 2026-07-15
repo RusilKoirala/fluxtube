@@ -5,9 +5,10 @@ import { eq, count } from "drizzle-orm";
 
 
 // get user by idd
-export async function GET(request:NextRequest, {params } : { params : { id: string}}) {
+export async function GET(request:NextRequest, {params } : { params : Promise<{ id: string}>}) {
     try {
-        const UserID = parseInt(params.id)
+        const { id } = await params;
+        const UserID = parseInt(id)
         const user = await db.select().from(users).where(eq(users.id, UserID));
 
         if (user.length === 0 ) {
@@ -45,9 +46,10 @@ export async function GET(request:NextRequest, {params } : { params : { id: stri
 
 
 // update user
-export async function PATCH(request: NextRequest, {params}: {params: {id: string}}) {
+export async function PATCH(request: NextRequest, {params}: {params: Promise<{id: string}>}) {
     try {
-        const userId = parseInt(params.id)
+        const { id } = await params;
+        const userId = parseInt(id)
         const updates = await request.json();
 
         const updatedUser = await db.update(users).set(updates).where(

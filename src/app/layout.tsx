@@ -3,6 +3,7 @@ import { Inter, Geist } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Providers } from "./providers";
+import { AuthProvider } from "@/components/AuthProvider";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -27,7 +28,11 @@ export default function RootLayout({
       <body
         className={inter.className}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <AuthProvider>
+             {children}
+          </AuthProvider>
+          </Providers>
       </body>
     </html>
   );

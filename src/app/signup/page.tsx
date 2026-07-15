@@ -23,7 +23,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] flex items-center justify-center px-6">
+    <div className="min-h-screen bg-[#050505] flex items-center justfiy-center px-6">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3">
@@ -116,7 +116,7 @@ export default function SignupPage() {
             <p className="text-white/60 text-sm">
             Already are a member?{' '}
             <Link href='/login' className="text-[#E50914] hover:underline">
-            Sign In
+            
             </Link>
             </p>
           </div>

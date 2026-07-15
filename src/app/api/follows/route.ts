@@ -16,6 +16,10 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get("userId");
     const type = searchParams.get("type");
 
+    if (!userId) {
+      return NextResponse.json({ error: 'User ID required' }, { status: 400 });
+    }
+
     if (type === "followers") 
     {
       const followers = await db
@@ -28,7 +32,7 @@ export async function GET(request: NextRequest) {
         })
         .from(follows)
         .leftJoin(users, eq(follows.followerId, users.id))
-        .where(eq(follows.followerId, parseInt(userId)));
+        .where(eq(follows.followingId, parseInt(userId!)));
 
       return NextResponse.json(followers);
     }
@@ -45,7 +49,7 @@ export async function GET(request: NextRequest) {
         })
         .from(follows)
         .leftJoin(users, eq(follows.followingId, users.id))
-        .where(eq(follows.followerId, parseInt(userId)));
+        .where(eq(follows.followerId, parseInt(userId!)));
 
       return NextResponse.json(following);
     }
@@ -59,7 +63,7 @@ export async function GET(request: NextRequest) {
       },
     );
   } catch (error) {
-    NextResponse.json({
+    return NextResponse.json({
         error: 'Failed to fetch follows'
     }, {
         status: 500
@@ -109,8 +113,8 @@ export async function POST(request: NextRequest) {
         const newFollow = await db.insert(follows).values({
             followerId,
             followingId,
-            createdAt: new Date().toISOString,
-        })
+            createdAt: new Date().toISOString(),
+        }).returning()
 
         return NextResponse.json(newFollow[0]);
     } catch (error) {
