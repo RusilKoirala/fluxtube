@@ -29,7 +29,11 @@ export const useMovieDetails = (movieId: number) => {
     return useQuery({
         queryKey: ['movie', movieId],
         queryFn: async () => {
-            const { data }= await tmdbClient.get<MovieDetails>(`/movie/${movieId}`);
+            const { data }= await tmdbClient.get<MovieDetails>(`/movie/${movieId}`, {
+                params: {
+                    append_to_response: 'videos',
+                }
+            });
             return data;
         },
         enabled: !!movieId,

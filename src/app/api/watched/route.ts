@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
         if (!userId) {
             return NextResponse.json({
                 error:'User ID required'
-            })
+            }, { status: 400 })
         }
         const items = await db.select().from(watched).where(eq(watched.userId, parseInt(userId)));
 

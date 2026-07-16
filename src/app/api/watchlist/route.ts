@@ -1,12 +1,19 @@
 import { db } from "@/lib/db";
 import { watchlist } from "@/lib/db/schema";
 import { NextRequest, NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
-/// gett all watchlist itemss
-export async function GET() {
+/// get watchlist by userId
+export async function GET(request: NextRequest) {
     try {
-        const items = await db.select().from(watchlist)
+        const { searchParams } = new URL(request.url);
+        const userId = searchParams.get('userId');
+
+        if (!userId) {
+            return NextResponse.json({ error: 'User ID required' }, { status: 400 });
+        }
+
+        const items = await db.select().from(watchlist).where(eq(watchlist.userId, parseInt(userId)));
         return NextResponse.json(items);
     } catch (error) {
         return NextResponse.json({
@@ -17,14 +24,19 @@ export async function GET() {
 
 
 
-// post too add to watchlist 
+// post to add to watchlist 
 export async function POST(request: NextRequest) {
     try {
-        const {movieId} = await request.json();
+        const { userId, movieId } = await request.json();
+
+        if (!userId || !movieId) {
+            return NextResponse.json({ error: 'User ID and Movie ID required' }, { status: 400 });
+        }
         
         const newItem = await db.insert(watchlist).values({
+            userId,
             movieId,
-            addedAt: new Date().toISOString,
+            addedAt: new Date().toISOString(),
         }).returning();
 
         return NextResponse.json(newItem[0])
@@ -39,21 +51,27 @@ export async function POST(request: NextRequest) {
 
 
 
-// deletee from watch listt
-export async function DELETE(request:NextRequest) {
+// delete from watchlist
+export async function DELETE(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
-        const movieId = searchParams.get('movieId')
+        const userId = searchParams.get('userId');
+        const movieId = searchParams.get('movieId');
 
-        if (!movieId) {
+        if (!userId || !movieId) {
             return NextResponse.json({
-                error: 'Movie ID required'
-            })
+                error: 'User ID and Movie ID required'
+            }, { status: 400 })
         }
 
         await db.delete(watchlist).where(
-            eq(watchlist.movieId, parseInt(movieId))
-        )
+            and(
+                eq(watchlist.userId, parseInt(userId)),
+                eq(watchlist.movieId, parseInt(movieId))
+            )
+        );
+
+        return NextResponse.json({ success: true });
     } catch (error) {
         return NextResponse.json({
             error: "Failed to remove from watchlist"
