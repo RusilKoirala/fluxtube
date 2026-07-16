@@ -42,7 +42,7 @@ export const useMovieReviews = (movieId: number) => {
     return useQuery({
         queryKey: ['reviews', 'movie', movieId],
         queryFn: async() => {
-            const { data } = await axios.get<Review[]>(`/api/review?movieId=${movieId}`)
+            const { data } = await axios.get<Review[]>(`/api/reviews?movieId=${movieId}`)
             return data;
         },
         enabled: !!movieId,

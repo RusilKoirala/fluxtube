@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
             })
             .from(reviews)
             .leftJoin(users, eq(reviews.userId, users.id))
-            .where(reviews.movieId, parseInt(movieId))
+            .where(eq(reviews.movieId, parseInt(movieId)))
             .orderBy(desc(reviews.createdAt))
 
             return NextResponse.json(movieReviews)
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
 
 // post-> create revieww
 
-export async function POSt(request:NextRequest) {
+export async function POST(request:NextRequest) {
     try {
         const { userId , movieId, content , rating } = await request.json();
 
