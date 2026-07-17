@@ -9,7 +9,7 @@ import { useMovieDetails,
     useRecommendations } from '@/hooks/useMovies';
 import { useMovieReviews, useDeleteReview } from '@/hooks/useReviews';
 import { getImageUrl } from '@/lib/api/tmdb';
-
+import { TrailerModal } from '@/components/TrailerModal';
 
 
 
@@ -18,6 +18,9 @@ import { Calendar, Clock, Star, Plus, Check, Eye, Play, MessageSquare } from 'lu
 import { useAddToWatchlist, useRemoveFromWatchlist, useAddToWatched, useWatchlist, useWatched } from '@/hooks/useWatchlist';
 import { useMovieStore } from '@/store/useMovieStore';
 import { cn } from '@/lib/utils';
+
+
+
 import { Review } from '@/types/user';
 
 export default function MovieDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -43,6 +46,11 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [editingReview, setEditingReview] = useState<Review | undefined>();
 
+
+  const [showTrailer, setShowTrailer ] = useState(false)
+
+  const [selectedTrailer, setSelectedTrailer] = useState<{key: string; name:string} | null>(null);
+
   const userReview = reviews.find((r) => r.userId === currentUserId);
   const otherReviews = reviews.filter((r) => r.userId !== currentUserId);
 
@@ -52,6 +60,31 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
     setIsReviewModalOpen(true);
   };
 
+  const getOfficialTrailer = () => {
+    if (!movie?.videos?.results) {
+      console.log('No videos data:', movie?.videos);
+      return null;
+    }
+
+    console.log('Available videos:', movie.videos.results);
+
+    const trailer = movie.videos.results.find(
+      (video)=> video.type === 'Trailer' && video.site === 'YouTube' && video.official
+    )
+
+    if (!trailer) {
+      const anyTrailer = movie.videos.results.find(
+        (video)=> video.type === 'Trailer' && video.site === 'YouTube'
+      );
+      console.log('Found non-official trailer:', anyTrailer);
+      return anyTrailer;
+    }
+
+    console.log('Found official trailer:', trailer);
+    return trailer;
+  }
+
+  const trailer= getOfficialTrailer();
 
   const handleDeleteReview = (reviewId: number) => {
     if (confirm('Are you sure you want to delete this review?')) {
@@ -167,9 +200,22 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
 
       
               <div className="flex flex-wrap gap-3">
-                <button className="inline-flex items-center gap-2 px-8 py-3 bg-[#E50914] hover:bg-[#E50914]/90 text-white rounded text-sm font-medium uppercase tracking-wider transition-all">
+                <button 
+                onClick={()=> {
+                  if (trailer) {
+                    setSelectedTrailer({key: trailer.key, name: trailer.name});
+                    setShowTrailer(true);
+                  }
+                }}
+                disabled={!trailer}
+                className={cn(
+                  "inline-flex items-center gap-2 px-8 py-3 text-white rounded text-sm font-medium uppercase tracking-wider transition-all",
+                  trailer 
+                    ? "bg-[#E50914] hover:bg-[#E50914]/90 cursor-pointer"
+                    : "bg-white/10 cursor-not-allowed opacity-50"
+                )}>
                   <Play className="w-4 h-4 fill-white" />
-                  <span>Play Trailer</span>
+                  <span>{trailer ? 'Play Trailer' : 'No Trailer'}</span>
                 </button>
 
                 {currentUserId && (
@@ -287,6 +333,15 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
           movieId={movieId}
           movieTitle={movie.title}
           existingReview={editingReview || userReview}
+        />
+      )}
+
+      {selectedTrailer && (
+        <TrailerModal
+          isOpen={showTrailer}
+          onClose={() => setShowTrailer(false)}
+          videoKey={selectedTrailer.key}
+          title={selectedTrailer.name}
         />
       )}
     </div>
