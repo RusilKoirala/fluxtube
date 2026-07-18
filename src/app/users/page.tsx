@@ -10,6 +10,8 @@ import {
 } from "@/hooks/useUserSearch";
 import { Search, TrendingUp, Sparkles } from "lucide-react";
 import { useMovieStore } from "@/store/useMovieStore";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+
 
 export default function UsersPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,7 +27,8 @@ export default function UsersPage() {
   const showSearch = searchQuery.length > 0;
 
   return (
-    <div className="min-h-screen bg-black">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-black">
       <Header />
       <main className="max-w-[1200px] mx-auto px-4 pt-24 pb-12">
         <div className="max-w-2xl mx-auto mb-8">
@@ -136,5 +139,6 @@ export default function UsersPage() {
         FluxTube
       </footer>
     </div>
+    </ProtectedRoute>
   );
 }

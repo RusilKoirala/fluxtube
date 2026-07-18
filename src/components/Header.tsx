@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 
 export function Header() {
   const currentUserId = useMovieStore((state) => state.currentUserId);
+  const setCurrentUserId = useMovieStore((state) => state.setCurrentUserId);
   const clearCurrentUserId = useMovieStore((state) => state.clearCurrentUserId);
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
@@ -42,6 +43,68 @@ export function Header() {
     clearCurrentUserId();
     setShowUserMenu(false);
     router.push('/login');
+  };
+
+
+  const handleDemoLogin = async () => {
+    try {
+      console.log('Attempting demo login...');
+      
+      const loginResponse = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: 'demo@fluxtube.com',
+          password: 'demo123'
+        })
+      });
+
+      console.log('Login response status:', loginResponse.status);
+
+      if (loginResponse.ok) {
+        const data = await loginResponse.json();
+        console.log('Login data:', data);
+        
+        if (data.token && data.user) {
+          localStorage.setItem('token', data.token);
+          setCurrentUserId(data.user.id);
+          router.push('/');
+          window.location.reload();
+          return;
+        }
+      }
+
+      console.log('Login failed, trying signup...');
+      
+      const signupResponse = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: 'demo',
+          email: 'demo@fluxtube.com',
+          password: 'demo123'
+        })
+      });
+
+      console.log('Signup response status:', signupResponse.status);
+
+      if (signupResponse.ok) {
+        const data = await signupResponse.json();
+        console.log('Signup data:', data);
+        
+        if (data.token && data.user) {
+          localStorage.setItem('token', data.token);
+          setCurrentUserId(data.user.id);
+          router.push('/');
+          window.location.reload();
+        }
+      } else {
+        const errorData = await signupResponse.json();
+        console.error('Signup failed:', errorData);
+      }
+    } catch (error) {
+      console.error('Demo login error:', error);
+    }
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -171,7 +234,15 @@ export function Header() {
               </div>
             </>
           ) : (
-            <Link href="/login" className="hover:opacity-80">Sign In</Link>
+            <>
+              <button 
+                onClick={handleDemoLogin}
+                className="hover:opacity-80 px-3 py-1.5 bg-[#f5c518] text-black rounded font-semibold"
+              >
+                Demo
+              </button>
+              <Link href="/login" className="hover:opacity-80">Sign In</Link>
+            </>
           )}
         </div>
       </div>
