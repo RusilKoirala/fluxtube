@@ -1,72 +1,274 @@
+// src/app/page.tsx
 'use client';
 
 import { Header } from "@/components/Header";
-import { MovieGrid } from "@/components/MovieGrid";
-import { usePopularMovies, useTrendingMovies } from "@/hooks/useMovies";
-import { TrendingUp, Star } from "lucide-react";
+import { usePopularMovies, useTrendingMovies, useMovieDetails } from "@/hooks/useMovies";
+import { Star, TrendingUp, Play, Plus, Share2, Calendar, Clock } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { getImageUrl } from "@/lib/api/tmdb";
+import { useMovieStore } from "@/store/useMovieStore";
+import { useMovieReviews } from "@/hooks/useReviews";
 
 export default function HomePage() {
-  const { data: popular, isLoading: popularLoading } = usePopularMovies();
-  const { data: trending, isLoading: trendingLoading } = useTrendingMovies();
+  const { data: popular = [], isLoading: popularLoading } = usePopularMovies();
+  const { data: trending = [], isLoading: trendingLoading } = useTrendingMovies();
+
+  const featuredMovieId = trending[0]?.id;
+  const { data: featuredMovie } = useMovieDetails(featuredMovieId || 0);
+  const { data: featuredReviews = [] } = useMovieReviews(featuredMovieId || 0);
+
+  const currentUserId = useMovieStore((state) => state.currentUserId);
+
+  if (!featuredMovie) {
+    return (
+      <div className="min-h-screen bg-black">
+        <Header />
+        <div className="pt-32 flex items-center justify-center">
+          <div className="text-white/40">Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[#050505]">
+    <div className="min-h-screen bg-black">
       <Header />
 
-    
-      <div className="pt-32 pb-20 px-6 md:px-12 lg:px-14">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 tracking-tight">
-              Discover Movies
-            </h1>
-            <p className="text-white/60 text-base md:text-lg max-w-2xl mx-auto tracking-wide">
-              Track what you watch, share with friends, and never forget a great movie
-            </p>
-          </div>
+     
+      <div className="max-w-[1200px] mx-auto px-4 pt-24 pb-6">
+      
+        <div className="text-[13px] text-neutral-500 mb-2">
+          Home › Movies › {featuredMovie.genres?.[0]?.name || 'Featured'}
+        </div>
+
+
+        <h1 className="text-[32px] font-bold text-white mb-2">
+          {featuredMovie.title}{' '}
+          <span className="font-normal text-neutral-500">
+            ({new Date(featuredMovie.release_date).getFullYear()})
+          </span>
+        </h1>
+
+   
+        <div className="flex items-center gap-3 text-[14px] text-neutral-500 mb-4 flex-wrap">
+        
+          {featuredMovie.runtime && (
+            <span>{Math.floor(featuredMovie.runtime / 60)}h {featuredMovie.runtime % 60}m</span>
+          )}
+          <span>{featuredMovie.genres?.map(g => g.name).join(', ')}</span>
+          <span>{new Date(featuredMovie.release_date).toLocaleDateString()}</span>
         </div>
       </div>
 
-      <main className="px-6 md:px-12 lg:px-14 pb-24 space-y-16">
+  
+      <div className="max-w-[1200px] mx-auto px-4 pb-6 grid grid-cols-1 md:grid-cols-[300px_1fr_260px] gap-4">
+
+        <div className="aspect-[2/3] relative rounded border border-neutral-800 overflow-hidden bg-gradient-to-br from-neutral-800 to-black">
+          {featuredMovie.poster_path ? (
+            <Image
+              src={getImageUrl(featuredMovie.poster_path, 'w500')}
+              alt={featuredMovie.title}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full text-neutral-600 text-[13px]">
+              Poster image
+            </div>
+          )}
+        </div>
+
+  
+
+
+        <div className="relative min-h-[280px] rounded border border-neutral-800 overflow-hidden bg-gradient-to-br from-neutral-800 to-black">
+          {featuredMovie.backdrop_path ? (
+            <Image
+              src={getImageUrl(featuredMovie.backdrop_path, 'w1280')}
+              alt={featuredMovie.title}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full text-neutral-600 text-[13px]">
+              Backdrop / trailer thumbnail
+            </div>
+          )}
+          <Link
+            href={`/movie/${featuredMovie.id}`}
+            className="absolute bottom-3 left-3 flex items-center gap-2 bg-black/60 backdrop-blur-sm border border-white/30 px-3 py-2 rounded-full text-white text-[13px] hover:bg-black/80"
+          >
+            <Play className="w-4 h-4 fill-white" />
+            Play trailer
+          </Link>
+        </div>
+
+
+        <div className="flex flex-col gap-3">
+   
+          <div className="bg-neutral-900 border border-neutral-800 rounded p-3">
+            <div className="text-[12px] text-neutral-500 mb-2">FLUXTUBE RATING</div>
+            <div className="flex items-center gap-2">
+              <Star className="w-7 h-7 fill-[#f5c518] text-[#f5c518]" />
+              <span className="text-[22px] font-bold text-white">
+                {featuredMovie.vote_average.toFixed(1)}
+              </span>
+              <span className="text-[13px] text-neutral-500">/10</span>
+              <span className="text-[11px] text-neutral-600 ml-auto">
+                {featuredReviews.length}
+              </span>
+            </div>
+          </div>
+
      
-        <section>
-          <div className="flex items-center gap-3 mb-8">
-            <TrendingUp className="w-5 h-5 text-[#E50914]" />
-            <h2 className="text-xl md:text-2xl font-semibold text-white uppercase tracking-[0.15em]">
-              Trending This Week
-            </h2>
-          </div>
-
-          {trendingLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {[...Array(12)].map((_, i) => (
-                <div key={i} className="aspect-[2/3] bg-white/5 rounded-md animate-pulse" />
-              ))}
+          {currentUserId && (
+            <div className="bg-neutral-900 border border-neutral-800 rounded p-3">
+              <div className="text-[12px] text-neutral-500 mb-2">YOUR RATING</div>
+              <Link
+                href={`/movie/${featuredMovie.id}`}
+                className="flex items-center gap-2"
+              >
+                <Star className="w-7 h-7 text-neutral-700" />
+                <span className="text-[22px] font-bold text-neutral-600">Rate</span>
+              </Link>
             </div>
-          ) : (
-            <MovieGrid movies={trending || []} />
           )}
-        </section>
 
-        <section>
-          <div className="flex items-center gap-3 mb-8">
-            <Star className="w-5 h-5 text-yellow-500" />
-            <h2 className="text-xl md:text-2xl font-semibold text-white uppercase tracking-[0.15em]">
-              Popular Right Now
-            </h2>
+
+          {currentUserId && (
+            <>
+              <button className="flex items-center gap-2 bg-neutral-800 border border-neutral-700 rounded px-3 py-2 text-white text-[13px] hover:bg-neutral-700">
+                <Plus className="w-4 h-4" />
+                Add to Watchlist
+              </button>
+              <button className="flex items-center gap-2 bg-neutral-800 border border-neutral-700 rounded px-3 py-2 text-white text-[13px] hover:bg-neutral-700">
+                <Share2 className="w-4 h-4" />
+                Share
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+
+      <div className="max-w-[1200px] mx-auto px-4 py-5 border-t border-neutral-800">
+        <h2 className="text-[20px] font-semibold text-white mb-3">Storyline</h2>
+        <p className="text-[14px] text-neutral-300 leading-relaxed max-w-[800px]">
+          {featuredMovie.overview}
+        </p>
+        <div className="flex gap-2 mt-3 flex-wrap">
+          {featuredMovie.genres?.map((genre) => (
+            <span
+              key={genre.id}
+              className="border border-neutral-700 px-2 py-1 rounded-full text-[12px] text-neutral-500"
+            >
+              #{genre.name.toLowerCase().replace(' ', '-')}
+            </span>
+          ))}
+        </div>
+      </div>
+
+
+      <div className="max-w-[1200px] mx-auto px-4 py-5 border-t border-neutral-800">
+        <h2 className="text-[20px] font-semibold text-white mb-3">
+          Trending This Week
+          <Link href="/feed" className="float-right text-[13px] text-[#f5c518] font-normal hover:underline">
+            See all ›
+          </Link>
+        </h2>
+        {trendingLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="aspect-[2/3] bg-neutral-900 rounded animate-pulse" />
+            ))}
           </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+            {trending.slice(0, 6).map((movie) => (
+              <Link
+                key={movie.id}
+                href={`/movie/${movie.id}`}
+                className="group"
+              >
+                <div className="aspect-[2/3] relative rounded border border-neutral-800 overflow-hidden bg-gradient-to-br from-neutral-800 to-black mb-2">
+                  {movie.poster_path ? (
+                    <Image
+                      src={getImageUrl(movie.poster_path, 'w342')}
+                      alt={movie.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-neutral-600 text-[12px]">
+                      Poster
+                    </div>
+                  )}
+                </div>
+                <div className="text-[13px] font-semibold text-white group-hover:text-[#f5c518]">
+                  {movie.title}
+                </div>
+                <div className="text-[12px] text-neutral-500">
+                  {movie.vote_average.toFixed(1)}
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
 
-          {popularLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {[...Array(12)].map((_, i) => (
-                <div key={i} className="aspect-[2/3] bg-white/5 rounded-md animate-pulse" />
-              ))}
-            </div>
-          ) : (
-            <MovieGrid movies={popular || []} />
-          )}
-        </section>
-      </main>
+
+      <div className="max-w-[1200px] mx-auto px-4 py-5 border-t border-neutral-800">
+        <h2 className="text-[20px] font-semibold text-white mb-3">
+          Popular Right Now
+          <Link href="/feed" className="float-right text-[13px] text-[#f5c518] font-normal hover:underline">
+            See all ›
+          </Link>
+        </h2>
+        {popularLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="aspect-[2/3] bg-neutral-900 rounded animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+            {popular.slice(0, 6).map((movie) => (
+              <Link
+                key={movie.id}
+                href={`/movie/${movie.id}`}
+                className="group"
+              >
+                <div className="aspect-[2/3] relative rounded border border-neutral-800 overflow-hidden bg-gradient-to-br from-neutral-800 to-black mb-2">
+                  {movie.poster_path ? (
+                    <Image
+                      src={getImageUrl(movie.poster_path, 'w342')}
+                      alt={movie.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-neutral-600 text-[12px]">
+                      Poster
+                    </div>
+                  )}
+                </div>
+                <div className="text-[13px] font-semibold text-white group-hover:text-[#f5c518]">
+                  {movie.title}
+                </div>
+                <div className="text-[12px] text-neutral-500">
+                  {movie.vote_average.toFixed(1)}
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+
+      <footer className="max-w-[1200px] mx-auto px-4 py-8 border-t border-neutral-800 text-neutral-600 text-[12px]">
+        FluxTube
+      </footer>
     </div>
   );
 }

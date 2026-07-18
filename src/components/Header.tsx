@@ -1,174 +1,125 @@
+// src/components/Header.tsx
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { Search, Film, User, LogOut, Settings } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Search, Menu, User, Bookmark, LogOut, UserCircle } from 'lucide-react';
 import { useMovieStore } from '@/store/useMovieStore';
-import { useLogout } from '@/hooks/useAuth';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export function Header() {
-  const pathname = usePathname();
-  const router = useRouter();
   const currentUserId = useMovieStore((state) => state.currentUserId);
-  const logout = useLogout();
-
-
+  const clearCurrentUserId = useMovieStore((state) => state.clearCurrentUserId);
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchType, setSearchType] = useState('All');
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // get user from localStorage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, [currentUserId]);
-
-  useEffect(() => {
-    // close menu on click outside
-    function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setShowUserMenu(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const navItems = [
-    { href: '/', label: 'Home' },
-    { href: '/watchlist', label: 'Watchlist' },
-    { href: '/watched', label: 'Watched' },
-  ];
-
-  const isActivePath = (href: string) => {
-    const cleanHref = href.split('?')[0];
-    return pathname === cleanHref;
-  };
 
   const handleLogout = () => {
-    logout.mutate();
+    localStorage.removeItem('token');
+    clearCurrentUserId();
     setShowUserMenu(false);
+    router.push('/login');
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/feed?search=${encodeURIComponent(searchQuery)}`);
+    }
   };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50">
-      <div className="relative flex h-20 items-center justify-between px-6 md:px-12 lg:px-14">
-        <div className="flex items-center">
-          <Link href="/" className="flex items-center gap-3">
-            <Film className='w-5 h-5'/>
-            <span className="hidden text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-white/82 sm:inline">
-              FluxTube
-            </span>
-          </Link>
+    <header className="sticky top-0 z-50 bg-black border-b border-neutral-800">
+      <div className="flex items-center justify-center gap-5 px-4 py-2">
+        <Link href="/" className="bg-[#f5c518] text-black font-extrabold text-[20px] px-2 py-1 rounded tracking-wide">
+          FluxTube
+        </Link>
+
+        <div className="flex items-center gap-2 text-white text-[14px] font-semibold cursor-pointer hover:opacity-80">
+          <Menu className="w-5 h-5" />
+          <span>Menu</span>
         </div>
 
-        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 text-[0.88rem] uppercase tracking-[0.12em] text-white/86 lg:flex">
-          {navItems.map((item) => {
-            const isActive = isActivePath(item.href);
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  'relative pb-1.5 transition-colors hover:text-white',
-                  "after:absolute after:bottom-0 after:left-1/2 after:h-0.5 after:w-0 after:-translate-x-1/2 after:rounded-full after:bg-[#E50914] after:transition-[width] after:duration-300",
-                  isActive ? 'text-white after:w-5' : 'after:w-0 hover:after:w-4'
-                )}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="flex items-center gap-3 text-white">
-          <Link
-            href="/search"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/35 hover:bg-black/60 transition-colors"
-            aria-label="Search"
+        <form onSubmit={handleSearch} className="w-full max-w-[600px] flex bg-white rounded overflow-hidden">
+          <select
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+            className="border-none bg-neutral-200 px-2 text-[13px] text-neutral-900 outline-none"
           >
+            <option>All</option>
+            <option>Titles</option>
+            <option>People</option>
+          </select>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search movies"
+            className="flex-1 border-none px-3 py-2 text-[14px] text-neutral-900 outline-none"
+          />
+          <button type="submit" className="border-none bg-neutral-200 px-4 hover:bg-neutral-300">
+            <Search className="w-4 h-4 text-neutral-700" />
+          </button>
+        </form>
 
 
-            
-            <Search className="h-4 w-4" />
-          </Link>
 
-          {currentUserId && user ? (
-            <div className="relative" ref={menuRef}>
-              <button
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#E50914] hover:bg-[#E50914]/90 transition-colors"
-              >
-                {user.avatarUrl ? (
-                  <img src={user.avatarUrl} alt={user.username} className="w-full h-full rounded-full object-cover" />
-                ) : (
-                  <span className="text-sm font-semibold">{user.username?.[0]?.toUpperCase()}</span>
-                )}
-              </button>
 
-              {showUserMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-[#181818] border border-white/10 rounded-lg shadow-lg overflow-hidden">
-                  <div className="px-4 py-3 border-b border-white/10">
-                    <p className="text-white font-medium text-sm">{user.username}</p>
-                    <p className="text-white/50 text-xs truncate">{user.email}</p>
+        <div className="flex items-center gap-4 text-white text-[13px]">
+          {currentUserId ? (
+            <>
+              <Link href="/feed" className="hover:opacity-80 flex items-center gap-1">
+                <Bookmark className="w-4 h-4" />
+                <span>Watchlist</span>
+              </Link>
+
+
+
+
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="hover:opacity-80 flex items-center"
+                >
+                  <UserCircle className="w-6 h-6" />
+                </button>
+
+                {showUserMenu && (
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-neutral-900 border border-neutral-700 rounded shadow-lg">
+                    <Link
+                      href={`/profile/${currentUserId}`}
+                      onClick={() => setShowUserMenu(false)}
+                      className="flex items-center gap-2 px-4 py-3 hover:bg-neutral-800 text-white"
+                    >
+                      <User className="w-4 h-4" />
+                      <span>Profile</span>
+                    </Link>
+                    <Link
+                      href="/users"
+                      onClick={() => setShowUserMenu(false)}
+                      className="flex items-center gap-2 px-4 py-3 hover:bg-neutral-800 text-white border-t border-neutral-800"
+                    >
+                      <User className="w-4 h-4" />
+                      <span>Find Users</span>
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2 px-4 py-3 hover:bg-neutral-800 text-white border-t border-neutral-800"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Logout</span>
+
+                      
+                    </button>
                   </div>
-
-                  <Link
-                    href={`/profile/${currentUserId}`}
-                    onClick={() => setShowUserMenu(false)}
-                    className="flex items-center gap-3 px-4 py-2.5 text-white/80 hover:bg-white/5 transition-colors"
-                  >
-
-
-                    <User className="w-4 h-4" />
-                    <span className="text-sm">Profile</span>
-                  </Link>
-
-
-
-                  <Link
-                    href="/settings"
-                    onClick={() => setShowUserMenu(false)}
-                    className="flex items-center gap-3 px-4 py-2.5 text-white/80 hover:bg-white/5 transition-colors"
-                  >
-                    <Settings className="w-4 h-4" />
-                    <span className="text-sm">Settings</span>
-                  </Link>
-
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-red-400 hover:bg-red-500/10 transition-colors"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span className="text-sm">Logout</span>
-                  </button>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            </>
           ) : (
-            <div className="flex items-center gap-2">
-              <Link
-                href="/login"
-                className="px-4 py-2 text-sm text-white/80 hover:text-white transition-colors"
-              >
-                Login
-              </Link>
-              <Link
-                href="/signup"
-                className="px-4 py-2 bg-[#E50914] hover:bg-[#E50914]/90 text-white text-sm rounded-lg transition-colors"
-              >
-                Sign Up
-              </Link>
-            </div>
+            <Link href="/login" className="hover:opacity-80">Sign In</Link>
           )}
         </div>
-
       </div>
     </header>
   );
