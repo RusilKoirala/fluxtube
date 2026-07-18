@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1783509438375,
-      "tag": "0000_lumpy_onslaught",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1783521497545,
-      "tag": "0001_silly_mother_askani",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1783785657822,
-      "tag": "0002_glamorous_thor_girl",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1783838451187,
-      "tag": "0003_public_pete_wisdom",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1784033420209,
-      "tag": "0004_slow_warlock",
+      "when": 1784357855392,
+      "tag": "0000_cynical_stick",
       "breakpoints": true
     }
   ]
