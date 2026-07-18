@@ -25,37 +25,39 @@ export default function UsersPage() {
   const showSearch = searchQuery.length > 0;
 
   return (
-    <div className="min-h-screen bg-[#050505]">
+    <div className="min-h-screen bg-black">
       <Header />
-      <main className="pt-32 px-6 md:px-12 lg:px-14 pb-24">
-        <div className="max-w-2xl mx-auto mb-12">
+      <main className="max-w-[1200px] mx-auto px-4 pt-24 pb-12">
+        <div className="max-w-2xl mx-auto mb-8">
+          <h1 className="text-[32px] font-bold text-white mb-2">Find Users</h1>
+          <p className="text-[14px] text-neutral-500 mb-6">
+            Search and discover movie enthusiasts
+          </p>
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-500" />
             <input
               type="text"
               placeholder="Search users..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#E50914]/50 focus:bg-white/10 transition-all"
+              className="w-full pl-12 pr-4 py-3 bg-neutral-900 border border-neutral-800 rounded text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-[#f5c518]/50 focus:bg-neutral-800 transition-all text-[14px]"
             />
           </div>
         </div>
 
         {showSearch && (
-          <section className="mb-16">
-            <div className="flex items-center gap-3 mb-8">
-              <Search className="w-5 h-5 text-[#E50914]" />
-              <h2 className="text-xl md:text-2xl font-semibold text-white uppercase tracking-[0.15em]">
-                Search Results ({searchResults.length})
-              </h2>
-            </div>
+          <section className="mb-12 border-t border-neutral-800 pt-6">
+            <h2 className="text-[20px] font-semibold text-white mb-4 flex items-center gap-2">
+              <Search className="w-5 h-5 text-[#f5c518]" />
+              Search Results ({searchResults.length})
+            </h2>
 
             {searchLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[...Array(4)].map((_, i) => (
                   <div
                     key={i}
-                    className="bg-white/5 rounded-lg h-32 animate-pulse"
+                    className="bg-neutral-900 rounded h-24 animate-pulse"
                   />
                 ))}
               </div>
@@ -67,65 +69,72 @@ export default function UsersPage() {
               </div>
             ) : (
               <div className="text-center py-12">
-                <p className="text-white/40">No users found</p>
+                <p className="text-neutral-500 text-[14px]">No users found</p>
               </div>
             )}
           </section>
         )}
 
         {!showSearch && currentUserId && (
-            <section className="mb-16">
-                <div className="flex itmes-center gap-3 mb-8">
-                    <Sparkles className="w-5 h-5 text-purple-500"/>
-                    <h2 className="text-xl md:text-2xl font-semibold text-white uppercase tracking-[0.15em]">
-                        Suggested For You
-                    </h2>
-                </div>
+          <section className="mb-12 border-t border-neutral-800 pt-6">
+            <h2 className="text-[20px] font-semibold text-white mb-4 flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-[#f5c518]" />
+              Suggested For You
+            </h2>
 
-                {suggestedLoading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {[...Array(6)].map((_, i) => (
-                            <div key={i} className="bg-white/5 rounded-lg h-32 animate-pulse" />
-                        ))}
-                    </div>
-                ): suggestUsers.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {suggestUsers.map((user) => (
-                            <UserCard key={user.id} user={user} />
-                        ))}
-                    </div>
-                ): (
-                    <div className="text-center py-12">
-                        <p className="text-white/40">No suggestions</p>
-                    </div>
-                )}
-            </section>
+            {suggestedLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[...Array(6)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="bg-neutral-900 rounded h-24 animate-pulse"
+                  />
+                ))}
+              </div>
+            ) : suggestUsers.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {suggestUsers.map((user) => (
+                  <UserCard key={user.id} user={user} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-neutral-500 text-[14px]">No suggestions</p>
+              </div>
+            )}
+          </section>
         )}
-
 
         {!showSearch && (
-            <section>
-                <div className="flex items-center gap-3 mb-8">
-                    <TrendingUp className="w-5 h-5 text-[#E50914]"/>
-                    <h2 className="text-xl md:text-2xl font-semibold text-white uppercase tracking-[0.15em]">Popular Users</h2>
-                </div>
+          <section className="border-t border-neutral-800 pt-6">
+            <h2 className="text-[20px] font-semibold text-white mb-4 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-[#f5c518]" />
+              Popular Users
+            </h2>
 
-                {popularLoading? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {[...Array(8).map((_,i)=> (
-                            <div key={i} className="bg-white/5 rounded-lg h-32 animate-pulse"/>
-                        ))]}
-                    </div>
-                ): (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {popularUsers.map((users)=> (
-                            <UserCard key={users.id} user={users}/>
-                        ))}
-                    </div>
-                )}
-            </section>
+            {popularLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[...Array(8)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="bg-neutral-900 rounded h-24 animate-pulse"
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {popularUsers.map((users) => (
+                  <UserCard key={users.id} user={users} />
+                ))}
+              </div>
+            )}
+          </section>
         )}
       </main>
+
+      <footer className="max-w-[1200px] mx-auto px-4 py-8 border-t border-neutral-800 text-neutral-600 text-[12px]">
+        FluxTube
+      </footer>
     </div>
   );
 }

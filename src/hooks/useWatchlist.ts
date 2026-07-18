@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 
 
-// hook to get watchlist of user
+
 export const useWatchlist = (userId: number) => {
     return useQuery({
         queryKey: ['watchlist', userId],
@@ -15,7 +15,7 @@ export const useWatchlist = (userId: number) => {
     })
 }
 
-// hook to add to watchlist 
+
 export const useAddToWatchlist = () => {
   const queryClient = useQueryClient();
 
@@ -33,7 +33,6 @@ export const useAddToWatchlist = () => {
 
 
 
-// remove from watchlistt
 export const useRemoveFromWatchlist = () => {
     const queryClient = useQueryClient();
 
@@ -51,7 +50,7 @@ export const useRemoveFromWatchlist = () => {
 }
 
 
-// get watched
+
 export const useWatched= (userId: number)=> {
     return useQuery({
         queryKey: ['watched', userId],
@@ -63,7 +62,7 @@ export const useWatched= (userId: number)=> {
     })
 }
 
-// to add to watched
+
 export const useAddToWatched = () => {
     const queryClient = useQueryClient();
 
@@ -83,7 +82,6 @@ export const useAddToWatched = () => {
 
 
 
-// to remove from watched 
 export const useRemoveFromWatched= () => {
     const queryClient = useQueryClient();
 

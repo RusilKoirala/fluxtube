@@ -3,12 +3,16 @@
 
 import { Header } from "@/components/Header";
 import { usePopularMovies, useTrendingMovies, useMovieDetails } from "@/hooks/useMovies";
-import { Star, TrendingUp, Play, Plus, Share2, Calendar, Clock } from "lucide-react";
+import { Star, TrendingUp, Play, Plus, Share2, Calendar, Clock, Check } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { getImageUrl } from "@/lib/api/tmdb";
 import { useMovieStore } from "@/store/useMovieStore";
 import { useMovieReviews } from "@/hooks/useReviews";
+import { useState } from "react";
+import { useAddToWatchlist, useRemoveFromWatchlist, useWatchlist } from "@/hooks/useWatchlist";
+import { cn } from "@/lib/utils";
+
 
 export default function HomePage() {
   const { data: popular = [], isLoading: popularLoading } = usePopularMovies();
@@ -19,6 +23,31 @@ export default function HomePage() {
   const { data: featuredReviews = [] } = useMovieReviews(featuredMovieId || 0);
 
   const currentUserId = useMovieStore((state) => state.currentUserId);
+  const [showShareToast, setShowShareToast] = useState(false);
+
+  const { data: watchlist = [] } = useWatchlist(currentUserId || 0);
+  const addToWatchlist = useAddToWatchlist();
+  const removeFromWatchlist = useRemoveFromWatchlist();
+
+  const isInWatchlist = watchlist.some((item: any) => item.movieId === featuredMovieId);
+
+
+  const handleShare = () => {
+    const url = `${window.location.origin}/movie/${featuredMovieId}`;
+    navigator.clipboard.writeText(url);
+    setShowShareToast(true);
+    setTimeout(() => setShowShareToast(false), 3000);
+  };
+
+  const handleWatchlistToggle = () => {
+    if (!currentUserId || !featuredMovieId) return;
+    
+    if (isInWatchlist) {
+      removeFromWatchlist.mutate({ userId: currentUserId, movieId: featuredMovieId });
+    } else {
+      addToWatchlist.mutate({ userId: currentUserId, movieId: featuredMovieId });
+    }
+  };
 
   if (!featuredMovie) {
     return (
@@ -121,28 +150,24 @@ export default function HomePage() {
             </div>
           </div>
 
-     
-          {currentUserId && (
-            <div className="bg-neutral-900 border border-neutral-800 rounded p-3">
-              <div className="text-[12px] text-neutral-500 mb-2">YOUR RATING</div>
-              <Link
-                href={`/movie/${featuredMovie.id}`}
-                className="flex items-center gap-2"
-              >
-                <Star className="w-7 h-7 text-neutral-700" />
-                <span className="text-[22px] font-bold text-neutral-600">Rate</span>
-              </Link>
-            </div>
-          )}
-
-
           {currentUserId && (
             <>
-              <button className="flex items-center gap-2 bg-neutral-800 border border-neutral-700 rounded px-3 py-2 text-white text-[13px] hover:bg-neutral-700">
-                <Plus className="w-4 h-4" />
-                Add to Watchlist
+              <button 
+                onClick={handleWatchlistToggle}
+                className={cn(
+                  "flex items-center gap-2 rounded px-3 py-2 text-white text-[13px] border",
+                  isInWatchlist
+                    ? "bg-neutral-700 border-neutral-600 hover:bg-neutral-600"
+                    : "bg-neutral-800 border-neutral-700 hover:bg-neutral-700"
+                )}
+              >
+                {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                {isInWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
               </button>
-              <button className="flex items-center gap-2 bg-neutral-800 border border-neutral-700 rounded px-3 py-2 text-white text-[13px] hover:bg-neutral-700">
+              <button 
+                onClick={handleShare}
+                className="flex items-center gap-2 bg-neutral-800 border border-neutral-700 rounded px-3 py-2 text-white text-[13px] hover:bg-neutral-700"
+              >
                 <Share2 className="w-4 h-4" />
                 Share
               </button>
@@ -150,6 +175,12 @@ export default function HomePage() {
           )}
         </div>
       </div>
+
+      {showShareToast && (
+        <div className="fixed top-20 right-4 bg-green-600 text-white px-4 py-3 rounded shadow-lg z-50 text-[13px]">
+          Link copied to clipboard!
+        </div>
+      )}
 
 
       <div className="max-w-[1200px] mx-auto px-4 py-5 border-t border-neutral-800">

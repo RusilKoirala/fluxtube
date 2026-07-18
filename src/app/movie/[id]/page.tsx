@@ -12,9 +12,8 @@ import { getImageUrl } from '@/lib/api/tmdb';
 import { TrailerModal } from '@/components/TrailerModal';
 
 
-
 import Image from 'next/image';
-import { Calendar, Clock, Star, Plus, Check, Eye, Play, MessageSquare } from 'lucide-react';
+import { Calendar, Clock, Star, Plus, Check, Eye, Play, MessageSquare, Share2 } from 'lucide-react';
 import { useAddToWatchlist, useRemoveFromWatchlist, useAddToWatched, useWatchlist, useWatched } from '@/hooks/useWatchlist';
 import { useMovieStore } from '@/store/useMovieStore';
 import { cn } from '@/lib/utils';
@@ -47,12 +46,19 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
   const [editingReview, setEditingReview] = useState<Review | undefined>();
 
 
-  const [showTrailer, setShowTrailer ] = useState(false)
-
+  const [showTrailer, setShowTrailer] = useState(false);
   const [selectedTrailer, setSelectedTrailer] = useState<{key: string; name:string} | null>(null);
+  const [showShareToast, setShowShareToast] = useState(false);
 
   const userReview = reviews.find((r) => r.userId === currentUserId);
   const otherReviews = reviews.filter((r) => r.userId !== currentUserId);
+
+  const handleShare = () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url);
+    setShowShareToast(true);
+    setTimeout(() => setShowShareToast(false), 3000);
+  };
 
   const handleEditReview = (review: Review) => {
     setEditingReview(review);
@@ -99,12 +105,10 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
 
   if (isLoading) {
     return (
-
-
-      <div className="min-h-screen bg-[#050505]">
+      <div className="min-h-screen bg-black">
         <Header />
         <div className="pt-32 flex items-center justify-center h-[60vh]">
-          <div className="text-white/40 text-lg uppercase tracking-widest">Loading...</div>
+          <div className="text-neutral-500 text-sm">Loading...</div>
         </div>
       </div>
     );
@@ -112,187 +116,191 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
 
   if (!movie) {
     return (
-      <div className="min-h-screen bg-[#050505]">
+      <div className="min-h-screen bg-black">
         <Header />
         <div className="pt-32 flex items-center justify-center h-[60vh]">
-          <div className="text-white/40 text-lg uppercase tracking-widest">Movie not found</div>
+          <div className="text-neutral-500 text-sm">Movie not found</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#050505]">
+    <div className="min-h-screen bg-black">
       <Header />
 
-
-      <div className="relative h-screen">
-  
-
-
-        <div className="absolute inset-0">
-          <Image
-            src={getImageUrl(movie.backdrop_path, 'original')}
-            alt={movie.title}
-            fill
-            className="object-cover"
-            priority
-          />
-     
-          <div className="absolute inset-0 bg-linear-to-t from-[#050505] via-[#050505]/60 to-transparent" />
-          <div className="absolute inset-0 bg-linear-to-r from-[#050505]/80 via-transparent to-transparent" />
+      <div className="max-w-[1200px] mx-auto px-4 pt-24 pb-6">
+        <div className="text-[13px] text-neutral-500 mb-2">
+          Home › Movies › {movie.genres?.[0]?.name || 'Details'}
         </div>
 
-     
-        <div className="relative h-full flex items-end">
-          <div className="px-6 md:px-12 lg:px-14 pb-16 md:pb-20 w-full">
-            <div className="max-w-4xl">
-              
+        <h1 className="text-[32px] font-bold text-white mb-2">
+          {movie.title}{' '}
+          <span className="font-normal text-neutral-500">
+            ({new Date(movie.release_date).getFullYear()})
+          </span>
+        </h1>
 
+        <div className="flex items-center gap-3 text-[14px] text-neutral-500 mb-4 flex-wrap">
+          {movie.runtime && (
+            <span>{Math.floor(movie.runtime / 60)}h {movie.runtime % 60}m</span>
+          )}
+          <span>{movie.genres?.map(g => g.name).join(', ')}</span>
+          <span>{new Date(movie.release_date).toLocaleDateString()}</span>
+        </div>
+      </div>
 
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4 tracking-tight">
-                {movie.title}
-              </h1>
+      <div className="max-w-[1200px] mx-auto px-4 pb-6 grid grid-cols-1 md:grid-cols-[300px_1fr_260px] gap-4">
+        <div className="aspect-[2/3] relative rounded border border-neutral-800 overflow-hidden bg-gradient-to-br from-neutral-800 to-black">
+          {movie.poster_path ? (
+            <Image
+              src={getImageUrl(movie.poster_path, 'w500')}
+              alt={movie.title}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full text-neutral-600 text-[13px]">
+              Poster image
+            </div>
+          )}
+        </div>
 
-              
-              {movie.tagline && (
-                <p className="text-lg md:text-xl text-white/70 italic mb-6 tracking-wide">
-                  "{movie.tagline}"
-                </p>
-              )}
+        <div className="relative min-h-[280px] rounded border border-neutral-800 overflow-hidden bg-gradient-to-br from-neutral-800 to-black">
+          {movie.backdrop_path ? (
+            <Image
+              src={getImageUrl(movie.backdrop_path, 'w1280')}
+              alt={movie.title}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full text-neutral-600 text-[13px]">
+              Backdrop / trailer thumbnail
+            </div>
+          )}
+          <button
+            onClick={() => {
+              if (trailer) {
+                setSelectedTrailer({key: trailer.key, name: trailer.name});
+                setShowTrailer(true);
+              }
+            }}
+            disabled={!trailer}
+            className={cn(
+              "absolute bottom-3 left-3 flex items-center gap-2 px-3 py-2 rounded-full text-white text-[13px] border",
+              trailer
+                ? "bg-black/60 backdrop-blur-sm border-white/30 hover:bg-black/80"
+                : "bg-black/30 border-white/20 opacity-50 cursor-not-allowed"
+            )}
+          >
+            <Play className="w-4 h-4 fill-white" />
+            {trailer ? 'Play trailer' : 'No trailer'}
+          </button>
+        </div>
 
-              {/* Meta Info */}
-              <div className="flex flex-wrap items-center gap-4 md:gap-6 text-sm md:text-base text-white/80 mb-8">
-                <div className="flex items-center gap-2">
-                  <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                  <span className="font-semibold">{movie.vote_average.toFixed(1)}</span>
-                  <span className="text-white/50">/10</span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5" />
-                  <span>{new Date(movie.release_date).getFullYear()}</span>
-                </div>
-
-                {movie.runtime && (
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-5 h-5" />
-                    <span>{Math.floor(movie.runtime / 60)}h {movie.runtime % 60}m</span>
-                  </div>
-                )}
-
-                <div className="px-3 py-1 bg-white/10 backdrop-blur-sm rounded text-xs uppercase tracking-wider">
-                  {movie.status}
-                </div>
-              </div>
-
-  
-              <div className="flex flex-wrap gap-2 mb-8">
-                {movie.genres?.map((genre) => (
-                  <span
-                    key={genre.id}
-                    className="px-4 py-1.5 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full text-xs uppercase tracking-wider text-white/90 hover:bg-white/10 transition-colors"
-                  >
-                    {genre.name}
-                  </span>
-                ))}
-              </div>
-
-      
-              <div className="flex flex-wrap gap-3">
-                <button 
-                onClick={()=> {
-                  if (trailer) {
-                    setSelectedTrailer({key: trailer.key, name: trailer.name});
-                    setShowTrailer(true);
-                  }
-                }}
-                disabled={!trailer}
-                className={cn(
-                  "inline-flex items-center gap-2 px-8 py-3 text-white rounded text-sm font-medium uppercase tracking-wider transition-all",
-                  trailer 
-                    ? "bg-[#E50914] hover:bg-[#E50914]/90 cursor-pointer"
-                    : "bg-white/10 cursor-not-allowed opacity-50"
-                )}>
-                  <Play className="w-4 h-4 fill-white" />
-                  <span>{trailer ? 'Play Trailer' : 'No Trailer'}</span>
-                </button>
-
-                {currentUserId && (
-                  <>
-                    <button
-                      onClick={() => {
-                        if (isInWatchlist) {
-                          removeFromWatchlist.mutate({ userId: currentUserId, movieId });
-                        } else {
-                          addToWatchlist.mutate({ userId: currentUserId, movieId });
-                        }
-                      }}
-                      className={cn(
-                        "inline-flex items-center gap-2 px-6 py-3 rounded text-sm font-medium uppercase tracking-wider transition-all",
-                        isInWatchlist
-                          ? "bg-white/20 hover:bg-white/30 text-white"
-                          : "bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm"
-                      )}
-                    >
-                      {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                      <span>{isInWatchlist ? 'In Watchlist' : 'Add to List'}</span>
-                    </button>
-
-                    <button
-                      onClick={() => addToWatched.mutate({ userId: currentUserId, movieId })}
-                      disabled={isWatched}
-                      className={cn(
-                        "inline-flex items-center gap-2 px-6 py-3 rounded text-sm font-medium uppercase tracking-wider transition-all",
-                        isWatched
-                          ? "bg-green-600/80 text-white cursor-default"
-                          : "bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm"
-                      )}
-                    >
-                      <Eye className="w-4 h-4" />
-                      <span>{isWatched ? 'Watched' : 'Mark Watched'}</span>
-                    </button>
-
-                    <button
-                      onClick={() => setIsReviewModalOpen(true)}
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm rounded text-sm font-medium uppercase tracking-wider transition-all"
-                    >
-                      <MessageSquare className="w-4 h-4" />
-                      <span>{userReview ? 'Edit Review' : 'Write Review'}</span>
-                    </button>
-                  </>
-                )}
-              </div>
+        <div className="flex flex-col gap-3">
+          <div className="bg-neutral-900 border border-neutral-800 rounded p-3">
+            <div className="text-[12px] text-neutral-500 mb-2">FLUXTUBE RATING</div>
+            <div className="flex items-center gap-2">
+              <Star className="w-7 h-7 fill-[#f5c518] text-[#f5c518]" />
+              <span className="text-[22px] font-bold text-white">
+                {movie.vote_average.toFixed(1)}
+              </span>
+              <span className="text-[13px] text-neutral-500">/10</span>
+              <span className="text-[11px] text-neutral-600 ml-auto">
+                {reviews.length}
+              </span>
             </div>
           </div>
+
+          {currentUserId && (
+            <>
+              <button
+                onClick={() => {
+                  if (isInWatchlist) {
+                    removeFromWatchlist.mutate({ userId: currentUserId, movieId });
+                  } else {
+                    addToWatchlist.mutate({ userId: currentUserId, movieId });
+                  }
+                }}
+                className={cn(
+                  "flex items-center gap-2 rounded px-3 py-2 text-white text-[13px] border",
+                  isInWatchlist
+                    ? "bg-neutral-700 border-neutral-600 hover:bg-neutral-600"
+                    : "bg-neutral-800 border-neutral-700 hover:bg-neutral-700"
+                )}
+              >
+                {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                {isInWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
+              </button>
+
+              <button
+                onClick={() => addToWatched.mutate({ userId: currentUserId, movieId })}
+                disabled={isWatched}
+                className={cn(
+                  "flex items-center gap-2 rounded px-3 py-2 text-white text-[13px] border",
+                  isWatched
+                    ? "bg-green-800 border-green-700 cursor-default"
+                    : "bg-neutral-800 border-neutral-700 hover:bg-neutral-700"
+                )}
+              >
+                <Eye className="w-4 h-4" />
+                {isWatched ? 'Watched' : 'Mark Watched'}
+              </button>
+
+              <button
+                onClick={() => setIsReviewModalOpen(true)}
+                className="flex items-center gap-2 bg-neutral-800 border border-neutral-700 rounded px-3 py-2 text-white text-[13px] hover:bg-neutral-700"
+              >
+                <MessageSquare className="w-4 h-4" />
+                {userReview ? 'Edit Review' : 'Write Review'}
+              </button>
+
+              <button
+                onClick={handleShare}
+                className="flex items-center gap-2 bg-neutral-800 border border-neutral-700 rounded px-3 py-2 text-white text-[13px] hover:bg-neutral-700"
+              >
+                <Share2 className="w-4 h-4" />
+                Share
+              </button>
+            </>
+          )}
         </div>
       </div>
 
-   
-      <div className="px-6 md:px-12 lg:px-14 py-16 md:py-20">
-        <div className="max-w-4xl">
-          <h2 className="text-xl md:text-2xl font-semibold text-white uppercase tracking-[0.15em] mb-6">
-            Overview
-          </h2>
-          <p className="text-white/70 text-base md:text-lg leading-relaxed tracking-wide">
-            {movie.overview}
-          </p>
+      {showShareToast && (
+        <div className="fixed top-20 right-4 bg-green-600 text-white px-4 py-3 rounded shadow-lg z-50 text-[13px]">
+          Link copied to clipboard!
+        </div>
+      )}
+
+      <div className="max-w-[1200px] mx-auto px-4 py-5 border-t border-neutral-800">
+        <h2 className="text-[20px] font-semibold text-white mb-3">Storyline</h2>
+        <p className="text-[14px] text-neutral-300 leading-relaxed max-w-[800px]">
+          {movie.overview}
+        </p>
+        <div className="flex gap-2 mt-3 flex-wrap">
+          {movie.genres?.map((genre) => (
+            <span
+              key={genre.id}
+              className="border border-neutral-700 px-2 py-1 rounded-full text-[12px] text-neutral-500"
+            >
+              #{genre.name.toLowerCase().replace(' ', '-')}
+            </span>
+          ))}
         </div>
       </div>
 
+      <div className="max-w-[1200px] mx-auto px-4 py-5 border-t border-neutral-800">
+        <h2 className="text-[20px] font-semibold text-white mb-4">
+          Reviews ({reviews.length})
+        </h2>
 
-      <div className="px-6 md:px-12 lg:px-14 pb-16">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-xl md:text-2xl font-semibold text-white uppercase tracking-[0.15em]">
-            Reviews ({reviews.length})
-          </h2>
-        </div>
-
-        <div className="space-y-6 max-w-4xl">
-  
+        <div className="space-y-4 max-w-4xl">
           {userReview && (
-            <div className="border-l-4 border-[#E50914] pl-6">
-              <p className="text-white/90 text-sm uppercase tracking-wider mb-4">Your Review</p>
+            <div className="border-l-4 border-[#f5c518] pl-4">
+              <p className="text-neutral-400 text-[12px] mb-3">YOUR REVIEW</p>
               <ReviewCard
                 review={userReview}
                 onEdit={handleEditReview}
@@ -301,30 +309,27 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
             </div>
           )}
 
-        
           {otherReviews.map((review) => (
             <ReviewCard key={review.id} review={review} />
           ))}
 
           {reviews.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-white/40">No reviews yet. Be the first to review!</p>
+              <p className="text-neutral-500 text-[14px]">No reviews yet. Be the first to review!</p>
             </div>
           )}
         </div>
       </div>
 
-     
       {recommendations && recommendations.length > 0 && (
-        <div className="px-6 md:px-12 lg:px-14 pb-24">
-          <h2 className="text-xl md:text-2xl font-semibold text-white uppercase tracking-[0.15em] mb-8">
+        <div className="max-w-[1200px] mx-auto px-4 py-5 border-t border-neutral-800">
+          <h2 className="text-[20px] font-semibold text-white mb-3">
             More Like This
           </h2>
           <MovieGrid movies={recommendations} />
         </div>
       )}
 
-      
       {currentUserId && (
         <ReviewModal
           isOpen={isReviewModalOpen}
@@ -344,6 +349,10 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
           title={selectedTrailer.name}
         />
       )}
+
+      <footer className="max-w-[1200px] mx-auto px-4 py-8 border-t border-neutral-800 text-neutral-600 text-[12px]">
+        FluxTube
+      </footer>
     </div>
   );
 }

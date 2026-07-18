@@ -8,16 +8,13 @@ import { FollowButton } from "@/components/FollowButton";
 import { useUser } from "@/hooks/useUser";
 import { useUserReviews } from "@/hooks/useReviews";
 import { useFollowers, useFollowing } from "@/hooks/useFollow";
-
-
-
 import { useWatchlist, useWatched } from "@/hooks/useWatchlist";
 import { useMovieStore } from "@/store/useMovieStore";
 import { useQuery } from "@tanstack/react-query";
 import { tmdbClient } from "@/lib/api/tmdb";
-
 import { Movie } from "@/types/movie";
 import Image from "next/image";
+import Link from "next/link";
 import { Film, Users, Clock, Star, List as ListIcon } from "lucide-react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
@@ -43,7 +40,6 @@ export default function ProfilePage({
 
   const isOwnProfile = currentUserId === userId;
 
-  // fetch movies for watchlistt
   const watchlistMovieIds = watchlist.map((item: any) => item.movieId);
   const { data: watchlistMovies = [] } = useQuery({
     queryKey: ["watchlist-movies", watchlistMovieIds],
@@ -58,7 +54,6 @@ export default function ProfilePage({
     enabled: watchlistMovieIds.length > 0,
   });
 
-  // fetch movies for watched
   const watchedMovieIds = watched.map((item: any) => item.movieId);
   const { data: watchedMovies = [] } = useQuery({
     queryKey: ["watched-movies", watchedMovieIds],
@@ -75,12 +70,10 @@ export default function ProfilePage({
 
   if (userLoading) {
     return (
-      <div className="min-h-screen bg-[#050505]">
+      <div className="min-h-screen bg-black">
         <Header />
         <div className="pt-32 flex items-center justify-center h-[60vh]">
-          <div className="text-white/40 text-lg uppercase tracking-widest">
-            Loading...
-          </div>
+          <div className="text-neutral-500 text-sm">Loading...</div>
         </div>
       </div>
     );
@@ -88,12 +81,10 @@ export default function ProfilePage({
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#050505]">
+      <div className="min-h-screen bg-black">
         <Header />
         <div className="pt-32 flex items-center justify-center h-[60vh]">
-          <div className="text-white/40 text-lg uppercase tracking-widest">
-            User not found
-          </div>
+          <div className="text-neutral-500 text-sm">User not found</div>
         </div>
       </div>
     );
@@ -101,23 +92,23 @@ export default function ProfilePage({
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[#050505]">
+      <div className="min-h-screen bg-black">
         <Header />
 
-        <div className="pt-32 px-6 md:px-12 lg:px-14 pb-12">
-          <div className="flex flex-col md:flex-row gap-8 items-start">
+        <div className="max-w-[1200px] mx-auto px-4 pt-24 pb-6">
+          <div className="flex flex-col md:flex-row gap-6 items-start">
             <div className="relative">
               {user.avatarUrl ? (
                 <Image
                   src={user.avatarUrl}
                   alt={user.username}
-                  width={160}
-                  height={160}
-                  className="rounded-full"
+                  width={120}
+                  height={120}
+                  className="rounded-full border-2 border-neutral-800"
                 />
               ) : (
-                <div className="w-40 h-40 rounded-full bg-white/10 flex items-center justify-center">
-                  <span className="text-5xl font-bold text-white/70">
+                <div className="w-[120px] h-[120px] rounded-full bg-neutral-800 border-2 border-neutral-700 flex items-center justify-center">
+                  <span className="text-4xl font-bold text-neutral-400">
                     {user.username[0].toUpperCase()}
                   </span>
                 </div>
@@ -125,12 +116,12 @@ export default function ProfilePage({
             </div>
 
             <div className="flex-1">
-              <div className="flex items-start justify-between mb-4">
+              <div className="flex items-start justify-between mb-3">
                 <div>
-                  <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
+                  <h1 className="text-[32px] font-bold text-white mb-1">
                     {user.username}
                   </h1>
-                  <p className="text-white/60">{user.email}</p>
+                  <p className="text-[14px] text-neutral-500">{user.email}</p>
                 </div>
 
                 {!isOwnProfile && currentUserId && (
@@ -142,247 +133,206 @@ export default function ProfilePage({
               </div>
 
               {user.bio && (
-                <p className="text-white/70 text-lg mb-6 max-w-2xl">
+                <p className="text-[14px] text-neutral-300 mb-4 max-w-2xl">
                   {user.bio}
                 </p>
               )}
 
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-                <div className="text-center md:text-left">
-                  <div className="flex items-center gap-2 text-white/90 mb-1">
-                    <Film className="w-5 h-5 text-[#E50914]" />
-                    <span className="text-2xl font-bold">
-                      {user.reviewCount}
-                    </span>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div className="bg-neutral-900 border border-neutral-800 rounded p-3 text-center">
+                  <div className="flex justify-center mb-1">
+                    <Star className="w-5 h-5 text-[#f5c518]" />
                   </div>
-                  <p className="text-white/50 text-sm uppercase tracking-wider">
-                    Reviews
-                  </p>
+                  <div className="text-[20px] font-bold text-white">
+                    {reviews.length}
+                  </div>
+                  <div className="text-[12px] text-neutral-500">Reviews</div>
                 </div>
 
-                <div className="text-center md:text-left">
-                  <div className="flex items-center gap-2 text-white/90 mb-1">
-                    <ListIcon className="w-5 h-5 text-blue-500" />
-                    <span className="text-2xl font-bold">
-                      {user.watchlistCount}
-                    </span>
+                <div className="bg-neutral-900 border border-neutral-800 rounded p-3 text-center">
+                  <div className="flex justify-center mb-1">
+                    <ListIcon className="w-5 h-5 text-[#f5c518]" />
                   </div>
-                  <p className="text-white/50 text-sm uppercase tracking-wider">
-                    Watchlist
-                  </p>
+                  <div className="text-[20px] font-bold text-white">
+                    {watchlist.length}
+                  </div>
+                  <div className="text-[12px] text-neutral-500">Watchlist</div>
                 </div>
 
-                <div className="text-center md:text-left">
-                  <div className="flex items-center gap-2 text-white/90 mb-1">
-                    <Clock className="w-5 h-5 text-green-500" />
-                    <span className="text-2xl font-bold">
-                      {user.watchedCount}
-                    </span>
+                <div className="bg-neutral-900 border border-neutral-800 rounded p-3 text-center">
+                  <div className="flex justify-center mb-1">
+                    <Clock className="w-5 h-5 text-[#f5c518]" />
                   </div>
-                  <p className="text-white/50 text-sm uppercase tracking-wider">
-                    Watched
-                  </p>
+                  <div className="text-[20px] font-bold text-white">
+                    {watched.length}
+                  </div>
+                  <div className="text-[12px] text-neutral-500">Watched</div>
                 </div>
 
-                <button
-                  onClick={() => setActiveTab("followers")}
-                  className="text-center md:text-left hover:opacity-80 transition-opacity"
-                >
-                  <div className="flex items-center gap-2 text-white/90 mb-1">
-                    <Users className="w-5 h-5 text-purple-500" />
-                    <span className="text-2xl font-bold">
-                      {user.followersCount}
-                    </span>
+                <div className="bg-neutral-900 border border-neutral-800 rounded p-3 text-center">
+                  <div className="flex justify-center mb-1">
+                    <Users className="w-5 h-5 text-[#f5c518]" />
                   </div>
-                  <p className="text-white/50 text-sm uppercase tracking-wider">
-                    Followers
-                  </p>
-                </button>
+                  <div className="text-[20px] font-bold text-white">
+                    {followers.length}
+                  </div>
+                  <div className="text-[12px] text-neutral-500">Followers</div>
+                </div>
 
-                <button
-                  onClick={() => setActiveTab("following")}
-                  className="text-center md:text-left hover:opacity-80 transition-opacity"
-                >
-                  <div className="flex items-center gap-2 text-white/90 mb-1">
-                    <Users className="w-5 h-5 text-pink-500" />
-                    <span className="text-2xl font-bold">
-                      {user.followingCount}
-                    </span>
+                <div className="bg-neutral-900 border border-neutral-800 rounded p-3 text-center">
+                  <div className="flex justify-center mb-1">
+                    <Users className="w-5 h-5 text-[#f5c518]" />
                   </div>
-                  <p className="text-white/50 text-sm uppercase tracking-wider">
-                    Following
-                  </p>
-                </button>
+                  <div className="text-[20px] font-bold text-white">
+                    {following.length}
+                  </div>
+                  <div className="text-[12px] text-neutral-500">Following</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="px-6 md:px-12 lg:px-14">
-          <div className="border-b border-white/10 mb-12">
-            <div className="flex gap-8 overflow-x-auto">
-              {[
-                { id: "reviews", label: "Reviews", count: reviews.length },
-                {
-                  id: "watchlist",
-                  label: "Watchlist",
-                  count: watchlistMovies.length,
-                },
-                {
-                  id: "watched",
-                  label: "Watched",
-                  count: watchedMovies.length,
-                },
-                {
-                  id: "followers",
-                  label: "Followers",
-                  count: followers.length,
-                },
-                {
-                  id: "following",
-                  label: "Following",
-                  count: following.length,
-                },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`pb-4 text-sm font-medium uppercase tracking-wider whitespace-nowrap transition-colors relative ${
-                    activeTab === tab.id
-                      ? "text-white after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#E50914]"
-                      : "text-white/50 hover:text-white/80"
-                  }`}
-                >
-                  {tab.label} ({tab.count})
-                </button>
-              ))}
-            </div>
+        <div className="max-w-[1200px] mx-auto px-4 py-5 border-t border-neutral-800">
+          <div className="flex gap-6 mb-6 border-b border-neutral-800">
+            {[
+              { key: "reviews", label: "Reviews", count: reviews.length },
+              { key: "watchlist", label: "Watchlist", count: watchlist.length },
+              { key: "watched", label: "Watched", count: watched.length },
+              { key: "followers", label: "Followers", count: followers.length },
+              { key: "following", label: "Following", count: following.length },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() =>
+                  setActiveTab(
+                    tab.key as
+                      | "reviews"
+                      | "watchlist"
+                      | "watched"
+                      | "followers"
+                      | "following",
+                  )
+                }
+                className={`pb-3 text-[14px] font-medium transition-colors ${
+                  activeTab === tab.key
+                    ? "text-[#f5c518] border-b-2 border-[#f5c518]"
+                    : "text-neutral-500 hover:text-neutral-300"
+                }`}
+              >
+                {tab.label} ({tab.count})
+              </button>
+            ))}
           </div>
 
-          <div className="pb-24">
+          <div className="mt-6">
             {activeTab === "reviews" && (
-              <div className="space-y-6 max-w-4xl">
+              <div className="space-y-4">
                 {reviews.length > 0 ? (
                   reviews.map((review) => (
-                    <ReviewCard key={review.id} review={review} showMovieLink />
+                    <ReviewCard key={review.id} review={review} />
                   ))
                 ) : (
-                  <div className="text-center py-12">
-                    <p className="text-white/40">No reviews yet</p>
-                  </div>
+                  <p className="text-center text-neutral-500 py-12 text-[14px]">
+                    No reviews yet
+                  </p>
                 )}
               </div>
             )}
 
-            {activeTab === "watchlist" &&
-              (watchlistMovies.length > 0 ? (
-                <MovieGrid movies={watchlistMovies} />
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-white/40">Watchlist is empty</p>
-                </div>
-              ))}
+            {activeTab === "watchlist" && (
+              <div>
+                {watchlistMovies.length > 0 ? (
+                  <MovieGrid movies={watchlistMovies} />
+                ) : (
+                  <p className="text-center text-neutral-500 py-12 text-[14px]">
+                    Watchlist is empty
+                  </p>
+                )}
+              </div>
+            )}
 
-            {activeTab === "watched" &&
-              (watchedMovies.length > 0 ? (
-                <MovieGrid movies={watchedMovies} />
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-white/40">No watched movies yet</p>
-                </div>
-              ))}
+            {activeTab === "watched" && (
+              <div>
+                {watchedMovies.length > 0 ? (
+                  <MovieGrid movies={watchedMovies} />
+                ) : (
+                  <p className="text-center text-neutral-500 py-12 text-[14px]">
+                    No watched movies yet
+                  </p>
+                )}
+              </div>
+            )}
 
             {activeTab === "followers" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {followers.length > 0 ? (
-                  followers.map((follower) => (
-                    <div
+                  followers.map((follower: any) => (
+                    <Link
                       key={follower.id}
-                      className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 hover:bg-white/10 transition-colors"
+                      href={`/profile/${follower.id}`}
+                      className="flex items-center gap-3 p-4 bg-neutral-900 border border-neutral-800 rounded hover:bg-neutral-800 transition-colors"
                     >
-                      <div className="flex items-center gap-4">
-                        {follower.avatarUrl ? (
-                          <Image
-                            src={follower.avatarUrl}
-                            alt={follower.username}
-                            width={48}
-                            height={48}
-                            className="rounded-full"
-                          />
-                        ) : (
-                          <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
-                            <span className="text-white/70 font-medium">
-                              {follower.username[0].toUpperCase()}
-                            </span>
-                          </div>
-                        )}
-                        <div className="flex-1">
-                          <p className="text-white font-medium">
-                            {follower.username}
-                          </p>
-                          {follower.bio && (
-                            <p className="text-white/50 text-sm line-clamp-1">
-                              {follower.bio}
-                            </p>
-                          )}
+                      <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center">
+                        <span className="text-lg font-bold text-neutral-400">
+                          {follower.username[0].toUpperCase()}
+                        </span>
+                      </div>
+                      <div>
+                        <div className="text-[14px] font-semibold text-white">
+                          {follower.username}
+                        </div>
+                        <div className="text-[12px] text-neutral-500">
+                          {follower.email}
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   ))
                 ) : (
-                  <div className="col-span-full text-center py-12">
-                    <p className="text-white/40">No followers yet</p>
-                  </div>
+                  <p className="col-span-2 text-center text-neutral-500 py-12 text-[14px]">
+                    No followers yet
+                  </p>
                 )}
               </div>
             )}
 
             {activeTab === "following" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {following.length > 0 ? (
-                  following.map((user) => (
-                    <div
+                  following.map((user: any) => (
+                    <Link
                       key={user.id}
-                      className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 hover:bg-white/10 transition-colors"
+                      href={`/profile/${user.id}`}
+                      className="flex items-center gap-3 p-4 bg-neutral-900 border border-neutral-800 rounded hover:bg-neutral-800 transition-colors"
                     >
-                      <div className="flex items-center gap-4">
-                        {user.avatarUrl ? (
-                          <Image
-                            src={user.avatarUrl}
-                            alt={user.username}
-                            width={48}
-                            height={48}
-                            className="rounded-full"
-                          />
-                        ) : (
-                          <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
-                            <span className="text-white/70 font-medium">
-                              {user.username[0].toUpperCase()}
-                            </span>
-                          </div>
-                        )}
-                        <div className="flex-1">
-                          <p className="text-white font-medium">
-                            {user.username}
-                          </p>
-                          {user.bio && (
-                            <p className="text-white/50 text-sm line-clamp-1">
-                              {user.bio}
-                            </p>
-                          )}
+                      <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center">
+                        <span className="text-lg font-bold text-neutral-400">
+                          {user.username[0].toUpperCase()}
+                        </span>
+                      </div>
+                      <div>
+                        <div className="text-[14px] font-semibold text-white">
+                          {user.username}
+                        </div>
+                        <div className="text-[12px] text-neutral-500">
+                          {user.email}
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   ))
                 ) : (
-                  <div className="col-span-full text-center py-12">
-                    <p className="text-white/40">Not following anyone yet</p>
-                  </div>
+                  <p className="col-span-2 text-center text-neutral-500 py-12 text-[14px]">
+                    Not following anyone yet
+                  </p>
                 )}
               </div>
             )}
           </div>
         </div>
+
+        <footer className="max-w-[1200px] mx-auto px-4 py-8 border-t border-neutral-800 text-neutral-600 text-[12px]">
+          FluxTube
+        </footer>
       </div>
     </ProtectedRoute>
   );
