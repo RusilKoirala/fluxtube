@@ -21,14 +21,15 @@ export async function GET() {
 // post -> create userr
 export async function POST(request:NextRequest) {
     try {
-        const { username, email, avatarUrl, bio } = await request.json()
+        const { username, email, password, avatarUrl, bio } = await request.json()
 
         const newUser = await db.insert(users).values({
             username,
             email,
+            password,
             avatarUrl: avatarUrl || null,
             bio: bio || null,
-            createdAt: new Date().toISOString,
+            createdAt: new Date().toISOString(),
         }).returning();
 
         return NextResponse.json(newUser[0])

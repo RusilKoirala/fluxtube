@@ -9,14 +9,14 @@ import { Movie } from "@/types/movie";
 import { useMovieStore } from "@/store/useMovieStore";
 
 
-export default function WatchlistPage() {
+export default function WatchedPage() {
     const currentUserId = useMovieStore((state)=> state.currentUserId);
-    const { data: watchlist = [] } = useMovieStore((state)=> state.currentUserId || 0)
+    const { data: watchedList = [] } = useWatchlist(currentUserId || 0);
     
-    const movieIds = watchlist.map((item: any)=> item.movieId);
+    const movieIds = watchedList.filter((item: any) => item.watchedAt).map((item: any)=> item.movieId);
 
     const { data: movies = []} = useQuery({
-        queryKey: ['watchlist-movies', movieIds],
+        queryKey: ['watched-movies', movieIds],
         queryFn: async() => {
             const moviePromises = movieIds.map((id: number)=> tmdbClient.get<Movie>(`/movie/${id}`));
             const responses  = await Promise.all(moviePromises);
@@ -32,15 +32,23 @@ export default function WatchlistPage() {
 
             <main className="container mx-auto px-4 py-8">
                 <h1 className="text-3xl font-bold text-white mb-8">
-                    My watchlist
+                    Watched Movies
                 </h1>
 
                 {!currentUserId ? (
                     <div className="text-center py-12">
-                        <p className="text-gray-400">Please log in to view your watchlist</p>
+                        <p className="text-gray-400">Please log in to view your watched movies</p>
                     </div>
-                ): (
-                    <MovieCard movie={movies}/>
+                ): movies.length === 0 ? (
+                    <div className="text-center py-12">
+                        <p className="text-gray-400">You haven't watched any movies yet</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        {movies.map((movie) => (
+                            <MovieCard key={movie.id} movie={movie} />
+                        ))}
+                    </div>
                 )}
             </main>
         </div>

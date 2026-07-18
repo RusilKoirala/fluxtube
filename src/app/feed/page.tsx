@@ -5,8 +5,9 @@ import { MovieGrid } from '@/components/MovieGrid';
 import { usePopularMovies, useTrendingMovies, useSearchMovies } from '@/hooks/useMovies';
 import { Star, TrendingUp, Search } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
-export default function FeedPage() {
+function FeedContent() {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
 
@@ -17,9 +18,7 @@ export default function FeedPage() {
   const showSearch = searchQuery.length > 0;
 
   return (
-    <div className="min-h-screen bg-black">
-      <Header />
-
+    <>
       <div className="max-w-[1200px] mx-auto px-4 pt-24 pb-6">
         <h1 className="text-[32px] font-bold text-white mb-2">
           {showSearch ? `Search: "${searchQuery}"` : 'Discover Movies'}
@@ -90,6 +89,23 @@ export default function FeedPage() {
       <footer className="max-w-[1200px] mx-auto px-4 py-8 border-t border-neutral-800 text-neutral-600 text-[12px]">
         FluxTube
       </footer>
+    </>
+  );
+}
+
+export default function FeedPage() {
+  return (
+    <div className="min-h-screen bg-black">
+      <Header />
+      <Suspense fallback={
+        <div className="max-w-[1200px] mx-auto px-4 pt-24">
+          <div className="text-center py-12">
+            <p className="text-neutral-500">Loading...</p>
+          </div>
+        </div>
+      }>
+        <FeedContent />
+      </Suspense>
     </div>
   );
 }

@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     const newLike = await db.insert(likes).values({
         userId,
         reviewId,
-        createdAt: new Date().toISOString,
+        createdAt: new Date().toISOString(),
     }).returning();
 
     return NextResponse.json(newLike[0]);

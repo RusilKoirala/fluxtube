@@ -5,16 +5,18 @@ import { reviews } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
 
-// update my review plss
-
-export async function PATCH(request: NextRequest, { params }: {params: {id: string}}) {
+export async function PATCH(
+    request: NextRequest,
+    context: { params: Promise<{ id: string }> }
+) {
     try {
-        const reviewId = parseInt(params.id)
+        const { id } = await context.params;
+        const reviewId = parseInt(id);
         const { content, rating } = await request.json();
 
 
         const updates: any = {
-            updatedAt: new Date().toISOString,
+            updatedAt: new Date().toISOString(),
         }
 
         if (content) updates.content = content;
@@ -35,10 +37,13 @@ export async function PATCH(request: NextRequest, { params }: {params: {id: stri
     }
 }
 
-// delete review
-export async function DELETE(request :NextRequest, { params }: {params : {id: string}}) {
+export async function DELETE(
+    request: NextRequest,
+    context: { params: Promise<{ id: string }> }
+) {
     try {
-        const reviewId = parseInt(params.id);
+        const { id } = await context.params;
+        const reviewId = parseInt(id);
 
         await db.delete(reviews).where(eq(reviews.id, reviewId))
 

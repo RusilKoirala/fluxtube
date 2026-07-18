@@ -70,7 +70,7 @@ export const useSignup = ()=> {
 };
 
 export const useLogout =()=> {
-    const setCurrentUserId = useMovieStore((state)=> state.setCurrentUserId);
+    const clearCurrentUserId = useMovieStore((state)=> state.clearCurrentUserId);
     const queryClient = useQueryClient();
     const router= useRouter();
 
@@ -78,7 +78,7 @@ export const useLogout =()=> {
         mutationFn: async ()=> {
             localStorage.removeItem('token');
             localStorage.removeItem('user')
-            setCurrentUserId(null);
+            clearCurrentUserId();
             queryClient.clear();
         },
         onSuccess: ()=> {
